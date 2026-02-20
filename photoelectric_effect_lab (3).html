@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1100, initial-scale=1">
+<title>Photoelectric Effect Lab</title>
+<style>
+/* ============================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================ */
+:root {
+  --bg:   #06090f;
+  --p1:   #0b1220;
+  --p2:   #0f1928;
+  --bdr:  #1a3050;
+  --cyan: #00d8ff;
+  --oran: #ff6b35;
+  --gree: #00ff88;
+  --yell: #ffc000;
+  --red:  #ff3366;
+  --dim:  #4a6a8a;
+  --txt:  #b0c8e0;
+  --font: 'Trebuchet MS','Segoe UI',Arial,sans-serif;
+  --mono: 'Courier New',Courier,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);color:var(--txt);font-family:var(--font);
+  font-size:12px;height:100vh;overflow:hidden;
+  display:flex;flex-direction:column;user-select:none;
+}
+/* ── Header ── */
+#hdr{
+  background:linear-gradient(90deg,#07101e 0%,#0d2040 50%,#07101e 100%);
+  border-bottom:2px solid var(--cyan);padding:5px 14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 18px rgba(0,200,255,.22);
+}
+#hdr h1{
+  color:var(--cyan);font-size:15px;font-weight:bold;
+  text-transform:uppercase;letter-spacing:2px;
+  text-shadow:0 0 14px rgba(0,200,255,.55);
+}
+#hdr .sub{color:var(--dim);font-size:10px;margin-top:1px;}
+#hdr .eqs{color:var(--dim);font-size:10px;text-align:right;line-height:1.8;}
+
+/* ── Layout ── */
+#main{flex:1;min-height:0;display:flex;gap:6px;padding:6px;overflow:hidden;}
+#left{width:40%;display:flex;flex-direction:column;gap:5px;flex-shrink:0;}
+#right{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden;}
+
+/* ── Panels ── */
+.pnl{background:var(--p1);border:1px solid var(--bdr);border-radius:5px;padding:4px 7px;position:relative;}
+.pnl-grow{flex:1;min-height:0;display:flex;flex-direction:column;}
+.pt{font-size:9px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--cyan);margin-bottom:3px;padding-bottom:2px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+
+/* ── Canvas wrappers ── */
+.cv-wrap{flex:1;min-height:0;position:relative;}
+canvas{display:block;width:100%;height:100%;}
+
+/* ── Metal selector ── */
+#m-row{display:flex;align-items:center;gap:6px;}
+#m-row label{color:var(--cyan);font-size:10px;font-weight:bold;letter-spacing:1px;white-space:nowrap;}
+select{
+  flex:1;background:var(--p2);color:var(--txt);border:1px solid var(--bdr);
+  border-radius:3px;padding:3px 6px;font-family:var(--font);font-size:11px;cursor:pointer;outline:none;
+}
+select:focus{border-color:var(--cyan);}
+#thr-lbl{
+  font-size:10px;color:var(--dim);white-space:nowrap;padding:2px 7px;
+  background:var(--p2);border-radius:3px;border:1px solid var(--bdr);font-family:var(--mono);
+}
+
+/* ── Control rows ── */
+.cr{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+.cl{width:82px;font-size:10px;color:var(--yell);font-weight:bold;flex-shrink:0;}
+input[type="range"]{
+  flex:1;height:5px;border-radius:3px;outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;
+  cursor:pointer;border:2px solid var(--cyan);box-shadow:0 0 6px rgba(0,200,255,.5);
+}
+#wl-sl{background:linear-gradient(90deg,#7b00ff 0%,#5500ff 12%,#0044ff 26%,#00aaff 40%,#00cc80 52%,#88cc00 62%,#ffcc00 72%,#ff7700 85%,#ff1100 100%);}
+#in-sl{background:linear-gradient(90deg,#102030 0%,#ffc000 100%);}
+#vt-sl{background:linear-gradient(90deg,#102030 0%,#ff3366 100%);}
+.ci{
+  width:60px;background:var(--p2);color:var(--txt);border:1px solid var(--bdr);
+  border-radius:3px;padding:2px 4px;text-align:right;font-family:var(--mono);font-size:11px;flex-shrink:0;
+}
+.ci:focus{outline:none;border-color:var(--cyan);}
+.cu{width:30px;font-size:9px;color:var(--dim);flex-shrink:0;}
+
+/* ── Status ── */
+#sts{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:bold;text-align:center;flex-shrink:0;}
+#sts.ok  {background:rgba(0,255,136,.07);color:var(--gree);border:1px solid rgba(0,255,136,.22);}
+#sts.warn{background:rgba(255,107,53,.08);color:var(--oran);border:1px solid rgba(255,107,53,.22);}
+#sts.stop{background:rgba(255,51,102,.08);color:var(--red);border:1px solid rgba(255,51,102,.22);}
+
+/* ── Instruments ── */
+.insts{display:flex;gap:6px;flex-shrink:0;}
+.inst{flex:1;background:#030810;border:2px solid var(--bdr);border-radius:5px;padding:3px 6px;text-align:center;}
+.inst.am{border-color:#00cc66;}.inst.vm{border-color:#dd5520;}
+.ilbl{font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);margin-bottom:1px;}
+.inst.am .ilbl{color:#008844;}.inst.vm .ilbl{color:#aa3311;}
+.ival{font-family:var(--mono);font-size:19px;font-weight:bold;letter-spacing:1px;}
+.inst.am .ival{color:var(--gree);}.inst.vm .ival{color:var(--oran);}
+.iunt{font-size:9px;color:var(--dim);margin-top:0;}
+
+/* ── Physics chips ── */
+#info{display:flex;gap:4px;flex-shrink:0;}
+.chip{flex:1;background:var(--p2);border:1px solid var(--bdr);border-radius:3px;
+      padding:2px 4px;font-size:9px;color:var(--dim);text-align:center;line-height:1.4;}
+.chip span{display:block;color:var(--txt);font-family:var(--mono);font-size:10px;}
+
+/* ── Answer box ── */
+#ans-row{display:flex;align-items:center;gap:5px;}
+#ans-lbl{font-size:10px;color:var(--yell);font-weight:bold;white-space:nowrap;}
+#ans-in{
+  width:65px;background:#030810;color:var(--yell);border:2px solid var(--yell);
+  border-radius:3px;padding:2px 5px;text-align:center;font-family:var(--mono);font-size:13px;font-weight:bold;
+}
+#ans-in:focus{outline:none;box-shadow:0 0 8px rgba(255,192,0,.4);}
+.eu{font-size:10px;color:var(--dim);}
+#chk-btn{
+  background:linear-gradient(135deg,#10201a,#1c3828);color:var(--gree);
+  border:1px solid var(--gree);border-radius:3px;padding:3px 10px;
+  font-size:10px;font-weight:bold;cursor:pointer;letter-spacing:1px;transition:all .15s;
+}
+#chk-btn:hover{background:linear-gradient(135deg,#1c3828,#284838);box-shadow:0 0 7px rgba(0,255,136,.3);}
+#ans-res{font-size:10px;font-weight:bold;padding:2px 7px;border-radius:3px;}
+#ans-res.cor{background:rgba(0,255,136,.1);color:var(--gree);border:1px solid rgba(0,255,136,.3);}
+#ans-res.wrg{background:rgba(255,51,102,.1);color:var(--red);border:1px solid rgba(255,51,102,.3);}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div>
+    <h1>⚡ Photoelectric Effect Lab — Physics With Keith</h1>
+    <div class="sub">Measure the work function of a metal using a vacuum photocell &amp; ammeter | Photocathode area: 1 cm²</div>
+  </div>
+  <div class="eqs">
+    <span>hf = φ + eV<sub>stop</sub></span><br>
+    <span>hc/e = 1240 eV·nm &nbsp;|&nbsp; h = 6.626×10⁻³⁴ J·s</span>
+  </div>
+</div>
+
+<div id="main">
+
+  <!-- LEFT: canvases -->
+  <div id="left">
+    <!-- Photocell animation -->
+    <div class="pnl pnl-grow" style="flex:1">
+      <div class="pt">▶ Photocell — Internal View</div>
+      <div class="cv-wrap"><canvas id="pc"></canvas></div>
+    </div>
+    <!-- Circuit diagram -->
+    <div class="pnl" style="height:148px;display:flex;flex-direction:column;">
+      <div class="pt">◈ Circuit Diagram</div>
+      <div class="cv-wrap" style="flex:1"><canvas id="circ"></canvas></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: controls + instruments + graph + answer -->
+  <div id="right">
+
+    <!-- Metal selector -->
+    <div class="pnl" style="flex-shrink:0">
+      <div class="pt">◆ Photocathode Material</div>
+      <div id="m-row">
+        <label>METAL:</label>
+        <select id="m-sel"></select>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="pnl" style="flex-shrink:0">
+      <div class="pt">◈ Experiment Controls</div>
+      <div class="cr">
+        <div class="cl">Wavelength:</div>
+        <input type="range" id="wl-sl" min="200" max="700" value="400" step="1">
+        <input type="number" id="wl-in" class="ci" value="400" min="200" max="700" step="1">
+        <div class="cu">nm</div>
+      </div>
+      <div class="cr">
+        <div class="cl">Intensity:</div>
+        <input type="range" id="in-sl" min="10" max="1000" value="100" step="10">
+        <input type="number" id="in-in" class="ci" value="100" min="10" max="1000" step="10">
+        <div class="cu">W/m²</div>
+      </div>
+      <div class="cr" style="margin-bottom:0">
+        <div class="cl">Rev. Voltage:</div>
+        <input type="range" id="vt-sl" min="0" max="5" value="0" step="0.01">
+        <input type="number" id="vt-in" class="ci" value="0.00" min="0" max="5" step="0.01">
+        <div class="cu">V</div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div id="sts" class="ok">⚡ Adjust controls to start experiment</div>
+
+    <!-- Instruments -->
+    <div class="pnl" style="flex-shrink:0">
+      <div class="pt">◈ Instrument Readings</div>
+      <div class="insts">
+        <div class="inst am">
+          <div class="ilbl">AMMETER</div>
+          <div class="ival" id="a-val">0.000</div>
+          <div class="iunt" id="a-unt">μA</div>
+        </div>
+        <div class="inst vm">
+          <div class="ilbl">VOLTMETER</div>
+          <div class="ival" id="v-val">0.00</div>
+          <div class="iunt">V</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- I–V graph -->
+    <div class="pnl pnl-grow" style="flex:1">
+      <div class="pt">◈ I–V Characteristic Curve (hold reverse voltage steady)</div>
+      <div class="cv-wrap" style="flex:1"><canvas id="iv"></canvas></div>
+    </div>
+
+    <!-- Answer -->
+    <div class="pnl" style="flex-shrink:0">
+      <div class="pt">◈ Calculate Work Function — Enter Your Answer</div>
+      <div id="ans-row">
+        <div id="ans-lbl">Work function φ =</div>
+        <input type="number" id="ans-in" class="ci" style="width:70px;border-color:var(--yell);color:var(--yell);" placeholder="0.00" step="0.01">
+        <div class="eu">eV</div>
+        <button id="chk-btn" onclick="checkAnswer()">CHECK ▶</button>
+        <div id="ans-res" style="display:none"></div>
+        <div style="flex:1"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   PHYSICAL CONSTANTS
+   ================================================================ */
+const H      = 6.626e-34;   // Planck's constant [J·s]
+const C      = 2.998e8;     // Speed of light [m/s]
+const E_CH   = 1.602e-19;   // Elementary charge [C]
+const AREA   = 1e-4;        // 1 cm² photocathode [m²]
+const QE     = 0.001;       // Quantum efficiency 0.1%
+
+/* ================================================================
+   METAL WORK FUNCTIONS (eV) — CRC Handbook values
+   Standard textbook metals for the photoelectric experiment
+   ================================================================ */
+const METALS = {
+  'Caesium (Cs)':    { wf: 2.10, col: '#e8d050', sym: 'Cs' },
+  'Potassium (K)':   { wf: 2.29, col: '#c090e0', sym: 'K'  },
+  'Rubidium (Rb)':   { wf: 2.16, col: '#d0b0f0', sym: 'Rb' },
+  'Sodium (Na)':     { wf: 2.75, col: '#ff9040', sym: 'Na' },
+  'Calcium (Ca)':    { wf: 2.87, col: '#8090d8', sym: 'Ca' },
+  'Magnesium (Mg)':  { wf: 3.66, col: '#90c890', sym: 'Mg' },
+  'Aluminium (Al)':  { wf: 4.08, col: '#d0d8e0', sym: 'Al' },
+  'Silver (Ag)':     { wf: 4.26, col: '#e0e4f0', sym: 'Ag' },
+  'Iron (Fe)':       { wf: 4.50, col: '#b07060', sym: 'Fe' },
+  'Tungsten (W)':    { wf: 4.55, col: '#b8b8c0', sym: 'W'  },
+  'Antimony (Sb)':   { wf: 4.55, col: '#7888a0', sym: 'Sb' },
+  'Copper (Cu)':     { wf: 4.70, col: '#d08830', sym: 'Cu' },
+  'Nickel (Ni)':     { wf: 5.01, col: '#909870', sym: 'Ni' },
+  'Gold (Au)':       { wf: 5.10, col: '#ffd700', sym: 'Au' },
+  'Platinum (Pt)':   { wf: 5.65, col: '#e0e0e8', sym: 'Pt' },
+};
+
+/* ================================================================
+   SIMULATION STATE — single source of truth
+   ================================================================ */
+const S = {
+  metal:   'Caesium (Cs)',
+  lambda:  400,   // incident wavelength [nm]
+  intens:  100,   // light intensity [W/m²]
+  voltage: 0,     // applied reverse voltage [V]
+  // Computed:
+  Ephoton: 0, phi: 0, lambda0: 0,
+  KEmax: 0, Vstop: 0, Isat: 0, Icurr: 0,
+  effect: false
+};
+
+/* ================================================================
+   PHYSICS ENGINE
+   
+   Key equations used:
+   ─────────────────────────────────────────────────────────────
+   1.  Photon energy:      E = hc/λ
+       In eV:              E(eV) = 1240 / λ(nm)          [shortcut]
+
+   2.  Threshold:          E > φ (work function) required for emission
+       Threshold λ:        λ₀ = hc/φ = 1240/φ(eV)  nm
+
+   3.  Max KE:             KE_max = hf − φ  (Einstein 1905)
+
+   4.  Stopping potential: eV_stop = KE_max
+                           V_stop  = KE_max (in eV, since e × V_stop = KE in eV × e)
+                           So numerically: V_stop(V) = KE_max(eV)
+
+   5.  Saturation current: I_sat = e × η × Φ
+       where photon flux   Φ = I_light × A / E_photon  [photons/s]
+       quantum efficiency  η = QE = 0.1% (realistic bulk metal value)
+
+   6.  I–V relationship (retarding field model):
+       Assumes uniform distribution of electron KE from 0 to KE_max.
+       Fraction of electrons that overcome retarding potential V:
+         I(V) = I_sat × (1 − V/V_stop)   for 0 ≤ V ≤ V_stop
+         I(V) = 0                          for V ≥ V_stop
+       This linear model is standard for A-level/IB physics.
+
+   Note: Intensity only affects I_sat (number of photons hitting cathode),
+   NOT the stopping potential or electron energy — core quantum result!
+   ─────────────────────────────────────────────────────────────
+   ================================================================ */
+function calcPhysics() {
+  const m = METALS[S.metal];
+  const lam_m = S.lambda * 1e-9;              // nm → m
+
+  // Photon energy
+  const Ej   = H * C / lam_m;                // [J]
+  S.Ephoton  = Ej / E_CH;                    // [eV]
+  S.phi      = m.wf;
+
+  // Threshold wavelength (nm): longest λ that can eject electrons
+  S.lambda0  = (H * C / (m.wf * E_CH)) * 1e9;  // [nm]
+
+  // Check if photoelectric effect occurs
+  if (S.Ephoton <= S.phi) {
+    S.effect = false;
+    S.KEmax = S.Vstop = S.Isat = S.Icurr = 0;
+    return;
+  }
+  S.effect = true;
+
+  // Maximum kinetic energy [eV]
+  S.KEmax  = S.Ephoton - S.phi;
+
+  // Stopping potential [V] = KE_max [eV] / e ... but since KE_max is in eV,
+  // eV_stop = KE_max in eV  →  V_stop = KE_max (numerically identical in eV/V)
+  S.Vstop  = S.KEmax;
+
+  // Saturation photocurrent [μA]
+  const flux = (S.intens * AREA) / Ej;      // photons/s hitting cathode
+  S.Isat     = QE * E_CH * flux * 1e6;      // [μA]
+
+  // Photocurrent at current applied reverse voltage
+  if (S.voltage <= 0) {
+    S.Icurr = S.Isat;                        // accelerating — all electrons collected
+  } else if (S.voltage >= S.Vstop) {
+    S.Icurr = 0;                             // all electrons stopped
+  } else {
+    // Linear retarding model
+    S.Icurr = S.Isat * (1 - S.voltage / S.Vstop);
+  }
+}
+
+/* ================================================================
+   WAVELENGTH → RGB
+   ================================================================ */
+function wlRGB(nm) {
+  if (nm < 380) {
+    const t = Math.max(0,(nm-200)/180);
+    return [Math.round(80+t*100),0,Math.round(200+t*55)];
+  }
+  let r,g,b;
+  if      (nm<440){r=(440-nm)/60;      g=0;              b=1;}
+  else if (nm<490){r=0;                g=(nm-440)/50;    b=1;}
+  else if (nm<510){r=0;                g=1;              b=(510-nm)/20;}
+  else if (nm<580){r=(nm-510)/70;      g=1;              b=0;}
+  else if (nm<645){r=1;                g=(645-nm)/65;    b=0;}
+  else            {r=1;                g=0;              b=0;}
+  const f = nm<420 ? 0.3+0.7*(nm-380)/40 : nm>680 ? Math.max(0.1,1-(nm-680)/40) : 1.0;
+  return [Math.round(Math.min(255,r*f*255)),Math.round(Math.min(255,g*f*255)),Math.round(Math.min(255,b*f*255))];
+}
+function wlColor(nm,a=1){
+  const [r,g,b]=wlRGB(nm);
+  return a<1?`rgba(${r},${g},${b},${a})`:`rgb(${r},${g},${b})`;
+}
+
+/* ================================================================
+   HELPER: rounded rectangle path
+   ================================================================ */
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+/* ================================================================
+   CANVAS REFERENCES & RESIZE
+   ================================================================ */
+const pcC=document.getElementById('pc');
+const ciC=document.getElementById('circ');
+const ivC=document.getElementById('iv');
+const pcX=pcC.getContext('2d');
+const ciX=ciC.getContext('2d');
+const ivX=ivC.getContext('2d');
+
+function resizeAll(){
+  [pcC,ciC,ivC].forEach(c=>{
+    const r=c.getBoundingClientRect();
+    if(r.width>10)  c.width =Math.round(r.width);
+    if(r.height>10) c.height=Math.round(r.height);
+  });
+}
+
+/* ================================================================
+   PARTICLE SYSTEMS
+   ================================================================ */
+let photons   = [];   // each: {t, spd, dy}
+let electrons = [];   // each: {x,y,vx,vy,alpha,alive}
+let tick      = 0;
+
+/* ================================================================
+   DRAW PHOTOCELL
+   ================================================================ */
+function drawPC(){
+  const W=pcC.width, H=pcC.height;
+  const ctx=pcX;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#040810'; ctx.fillRect(0,0,W,H);
+
+  const m=METALS[S.metal];
+
+  /* ── Glass envelope ── */
+  const tx=W*0.12, ty=H*0.08, tw=W*0.76, th=H*0.84, tr=12;
+  ctx.save(); ctx.shadowColor='#002858'; ctx.shadowBlur=20;
+  ctx.strokeStyle='#1a3a6a'; ctx.lineWidth=1.5;
+  rrect(ctx,tx,ty,tw,th,tr); ctx.stroke(); ctx.restore();
+
+  ctx.fillStyle='rgba(3,8,18,0.97)';
+  rrect(ctx,tx,ty,tw,th,tr); ctx.fill();
+
+  const gb=ctx.createLinearGradient(tx,ty,tx+tw,ty+th);
+  gb.addColorStop(0,'#2a5090'); gb.addColorStop(0.5,'#162850'); gb.addColorStop(1,'#2a5090');
+  ctx.strokeStyle=gb; ctx.lineWidth=1.5;
+  rrect(ctx,tx,ty,tw,th,tr); ctx.stroke();
+
+  ctx.fillStyle='rgba(60,100,160,0.12)';
+  ctx.font=`bold ${Math.max(9,H*0.065)}px 'Trebuchet MS',sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('VACUUM',W*0.5,H*0.5);
+
+  /* ── Cathode ── */
+  const cx=tx+tw*0.18, cy1=H*0.17, cy2=H*0.83, cw=10;
+  if(S.effect){
+    ctx.save(); ctx.shadowColor=wlColor(S.lambda); ctx.shadowBlur=28;
+    ctx.fillStyle=wlColor(S.lambda,0.1); ctx.fillRect(cx-4,cy1,cw+8,cy2-cy1);
+    ctx.restore();
+  }
+  const cg=ctx.createLinearGradient(cx,0,cx+cw,0);
+  cg.addColorStop(0,'#484858'); cg.addColorStop(0.4,m.col); cg.addColorStop(1,'#282838');
+  ctx.fillStyle=cg; ctx.fillRect(cx,cy1,cw,cy2-cy1);
+
+  ctx.fillStyle='#7090b0';
+  ctx.font=`bold ${Math.max(8,H*0.052)}px 'Courier New',monospace`;
+  ctx.textBaseline='alphabetic'; ctx.textAlign='center';
+  ctx.fillText('C',cx+cw/2,cy1-4);
+  ctx.fillStyle=m.col;
+  ctx.font=`bold ${Math.max(8,H*0.058)}px 'Trebuchet MS',sans-serif`;
+  ctx.fillText(m.sym,cx+cw/2,cy2+12);
+
+  /* ── Anode ── */
+  const ax=tx+tw*0.76, ay1=H*0.35, ay2=H*0.65, aw=6;
+  ctx.fillStyle='#c0c8d8'; ctx.fillRect(ax,ay1,aw,ay2-ay1);
+  ctx.fillStyle='#7090b0';
+  ctx.font=`bold ${Math.max(8,H*0.052)}px 'Courier New',monospace`;
+  ctx.textBaseline='alphabetic'; ctx.textAlign='center';
+  ctx.fillText('A',ax+aw/2,ay1-4);
+
+  /* ── Lead-in stubs ── */
+  ctx.strokeStyle='#2a4060'; ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.moveTo(cx+cw/2,ty+th-2); ctx.lineTo(cx+cw/2,cy2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ax+aw/2,ty+th-2); ctx.lineTo(ax+aw/2,ay2); ctx.stroke();
+
+  /* ── Light beam ── */
+  const bcy=H*0.5, bhh=H*0.17;
+  const ba=Math.min(0.75,S.intens/250);
+  const lg=ctx.createLinearGradient(0,0,cx,0);
+  lg.addColorStop(0,'transparent');
+  lg.addColorStop(0.5,wlColor(S.lambda,ba*0.15));
+  lg.addColorStop(1,wlColor(S.lambda,ba*0.5));
+  ctx.fillStyle=lg; ctx.fillRect(0,bcy-bhh,cx,bhh*2);
+
+  /* ── Photon particles ── */
+  photons.forEach(p=>{
+    const prog=p.t/55;
+    const px=prog*(cx-6), py=H*0.5+p.dy*H*0.18;
+    const alpha=Math.max(0,1-Math.pow(Math.max(0,prog-0.80)/0.20,2))
+               *Math.min(1,S.intens/70);
+    if(alpha>0.03){
+      ctx.save(); ctx.globalAlpha=alpha;
+      ctx.fillStyle=wlColor(S.lambda);
+      ctx.shadowColor=wlColor(S.lambda); ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.arc(px,py,3,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+    p.t+=p.spd;
+  });
+  photons=photons.filter(p=>p.t<58);
+
+  /* ── Electron particles ── */
+  const cathodeX = cx + cw;          // right edge of cathode
+  const anodeX   = ax;               // left edge of anode
+  const totalXDist = anodeX - cathodeX;
+
+  electrons.forEach(el=>{
+    if(!el.alive)return;
+
+    // Only decelerate (and potentially reverse) when V >= Vstop
+    if(S.effect && S.Vstop > 0 && S.voltage >= S.Vstop){
+      const decelPerFrame = (S.voltage / S.Vstop) * 0.06;
+      el.vx -= decelPerFrame;
+    }
+
+    el.x += el.vx;
+    el.y += el.vy;
+
+    // Turned back: electron returns to cathode — kill it
+    if(el.x <= cathodeX - 5){
+      el.alive = false; return;
+    }
+
+    // Stop exactly at anode — clamp and fade quickly
+    if(el.x >= anodeX){
+      el.x = anodeX;    // don't let it pass through
+      el.vx = 0;
+      el.alpha -= 0.14;
+    }
+
+    if(el.y<ty||el.y>ty+th) el.alpha=0;
+    if(el.alpha<=0){el.alive=false;return;}
+
+    ctx.save(); ctx.globalAlpha=el.alpha;
+    ctx.fillStyle='#40c0ff';
+    ctx.shadowColor='#0099ff'; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.arc(el.x,el.y,2.5,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  });
+  electrons=electrons.filter(el=>el.alive);
+
+  /* ── Electric field lines (retarding) ── */
+  if(S.effect&&S.voltage>0.05){
+    const fa=Math.min(0.55,S.voltage/3.5);
+    ctx.strokeStyle=`rgba(255,80,40,${fa})`;
+    ctx.lineWidth=0.8; ctx.setLineDash([3,5]);
+    for(let i=-2;i<=2;i++){
+      const fy=H*0.5+i*H*0.08;
+      ctx.beginPath(); ctx.moveTo(ax+aw+4,fy); ctx.lineTo(cx,fy); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(cx+14,fy-4); ctx.lineTo(cx+4,fy); ctx.lineTo(cx+14,fy+4);
+      ctx.stroke(); ctx.setLineDash([3,5]);
+    }
+    ctx.setLineDash([]);
+    ctx.fillStyle=`rgba(255,80,40,${fa})`;
+    ctx.font=`bold 9px ${S.font}`;
+    ctx.textAlign='center';
+    ctx.fillText('E⃗',ax+aw+15,H*0.5);
+  }
+}
+
+/* ================================================================
+   DRAW CIRCUIT DIAGRAM — matches reference image layout
+   Topology: photocell (top) → μA (right branch) → battery+rheostat (bottom)
+             voltmeter in parallel with the supply (bottom section)
+   ================================================================ */
+function drawCircuit(){
+  const W=ciC.width, H=ciC.height;
+  const ctx=ciX;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#040810'; ctx.fillRect(0,0,W,H);
+
+  // Outer loop corners
+  const lx=W*0.09, rx=W*0.88;
+  const ty=H*0.09, by=H*0.76;
+
+  // Photocell: circle centred at top-centre
+  const pcx=W*0.50;
+  const pcr=Math.min(W*0.13, H*0.19);
+  const pcy=ty+pcr+H*0.03;
+
+  // Ammeter: on right vertical wire, mid-way (not at a corner)
+  const amr=Math.min(W*0.052, H*0.060, 13);
+  const amx=rx, amy=(ty+by)*0.56;
+
+  // Variable battery: centred on bottom wire
+  const batHW=W*0.10;
+  const batMid=W*0.50;
+  const batL=batMid-batHW, batR=batMid+batHW;
+
+  // Voltmeter: parallel branch below bottom rail
+  const vmDropY=by+H*0.14;
+  const vmr=Math.min(W*0.052,H*0.060,12);
+  const vmx=W*0.50;
+
+  // ── Wires ──
+  const wc='#2a5090';
+  ctx.strokeStyle=wc; ctx.lineWidth=1.8;
+
+  // Top rail (split around photocell)
+  ctx.beginPath(); ctx.moveTo(lx,ty); ctx.lineTo(pcx-pcr,ty); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pcx+pcr,ty); ctx.lineTo(rx,ty); ctx.stroke();
+
+  // Left vertical: TL → BL
+  ctx.beginPath(); ctx.moveTo(lx,ty); ctx.lineTo(lx,by); ctx.stroke();
+
+  // Right vertical: TR → (gap for ammeter) → BR
+  ctx.beginPath(); ctx.moveTo(rx,ty); ctx.lineTo(rx,amy-amr); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(rx,amy+amr); ctx.lineTo(rx,by); ctx.stroke();
+
+  // Bottom rail (split around variable battery)
+  ctx.beginPath(); ctx.moveTo(lx,by); ctx.lineTo(batMid-3,by); ctx.stroke(); //here here here
+  ctx.beginPath(); ctx.moveTo(batMid+3,by); ctx.lineTo(rx,by); ctx.stroke();
+
+  // Voltmeter parallel branch: stub down from batL and batR, joined below
+  ctx.beginPath(); ctx.moveTo(batL,by); ctx.lineTo(batL,vmDropY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(batR,by); ctx.lineTo(batR,vmDropY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(batL,vmDropY); ctx.lineTo(vmx-vmr,vmDropY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(vmx+vmr,vmDropY); ctx.lineTo(batR,vmDropY); ctx.stroke();
+
+  // Junction dots
+  ctx.fillStyle=wc;
+  [[batL,by],[batR,by]].forEach(([jx,jy])=>{
+    ctx.beginPath(); ctx.arc(jx,jy,3,0,Math.PI*2); ctx.fill();
+  });
+
+  // Lead wires: photocell circle rims down to top rail
+  ctx.strokeStyle=wc; ctx.lineWidth=1.8;
+  ctx.beginPath(); ctx.moveTo(pcx-pcr,ty); ctx.lineTo(pcx-pcr,pcy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pcx+pcr,ty); ctx.lineTo(pcx+pcr,pcy); ctx.stroke();
+
+  // ── Photocell circle ──
+  ctx.save();
+  ctx.strokeStyle='#4a7aaa'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(pcx,pcy,pcr,0,Math.PI*2); ctx.stroke();
+  // Cathode: thick vertical bar, left of centre
+  ctx.strokeStyle='#8090a0'; ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.moveTo(pcx-pcr*0.28, pcy-pcr*0.52);
+  ctx.lineTo(pcx-pcr*0.28, pcy+pcr*0.52);
+  ctx.stroke();
+  // Anode: thin shorter bar, right of centre
+  ctx.strokeStyle='#9090b0'; ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.moveTo(pcx+pcr*0.26, pcy-pcr*0.1);
+  ctx.lineTo(pcx+pcr*0.26, pcy+pcr*0.1);
+  ctx.stroke();
+  // EM radiation arrows from left into cell (colour matches wavelength)
+  const rCol=wlColor(S.lambda,0.85);
+  ctx.strokeStyle=rCol; ctx.lineWidth=1.3;
+  const aLen=pcr*0.55;
+  for(let i=-1;i<=1;i++){
+    const ry=pcy+i*pcr*0.28;
+    const x0=pcx-pcr-aLen, x1=pcx-pcr-3;
+    ctx.beginPath(); ctx.moveTo(x0,ry); ctx.lineTo(x1,ry); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x1-7,ry-3.5); ctx.lineTo(x1,ry); ctx.lineTo(x1-7,ry+3.5);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // ── Ammeter (μA) — on right vertical wire, mid-way ──
+  ctx.save();
+  ctx.strokeStyle='#00cc66'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(amx,amy,amr,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle='#00cc66';
+  ctx.font=`bold ${Math.max(6,amr*0.72)}px Trebuchet MS`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('μA',amx,amy);
+  ctx.restore();
+
+  // ── Variable battery ── (standard battery plates + diagonal arrow = variable)
+  ctx.save();
+  ctx.strokeStyle='#cc8844';
+  // Long plate
+  ctx.lineWidth=2.8;
+  ctx.beginPath(); ctx.moveTo(batMid-3,by-11); ctx.lineTo(batMid-3,by+11); ctx.stroke();
+  // Short plate
+  ctx.lineWidth=1.3;
+  ctx.beginPath(); ctx.moveTo(batMid+3,by-6); ctx.lineTo(batMid+3,by+6); ctx.stroke();
+  // Diagonal arrow showing variable
+  ctx.lineWidth=1.2;
+  const arX1=batMid-batHW*0.7, arY1=by+16;
+  const arX2=batMid+batHW*0.7, arY2=by-16;
+  ctx.beginPath(); ctx.moveTo(arX1,arY1); ctx.lineTo(arX2,arY2); ctx.stroke();
+  const ang=Math.atan2(arY2-arY1,arX2-arX1);
+  ctx.beginPath();
+  ctx.moveTo(arX2-8*Math.cos(ang-0.42), arY2-8*Math.sin(ang-0.42));
+  ctx.lineTo(arX2,arY2);
+  ctx.lineTo(arX2-8*Math.cos(ang+0.42), arY2-8*Math.sin(ang+0.42));
+  ctx.stroke();
+  ctx.restore();
+
+  // ── Voltmeter (V) — lower parallel branch ──
+  ctx.save();
+  ctx.strokeStyle='#dd5520'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(vmx,vmDropY,vmr,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle='#dd5520';
+  ctx.font=`bold ${Math.max(7,vmr*0.85)}px Trebuchet MS`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('V',vmx,vmDropY);
+  ctx.restore();
+
+  // ── Labels ──
+  const fs=Math.max(6, H*0.052);
+  ctx.font=`${fs}px Trebuchet MS`; ctx.textBaseline='alphabetic';
+}
+
+/* ================================================================
+   DRAW I–V GRAPH
+   ================================================================ */
+function drawIV(){
+  const W=ivC.width, H=ivC.height;
+  const ctx=ivX;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#04090f'; ctx.fillRect(0,0,W,H);
+
+  // Graph margins
+  const ml=48, mr=14, mt=12, mb=32;
+  const gw=W-ml-mr, gh=H-mt-mb;
+  const gx=ml, gy=mt;
+
+  // Axis max values
+  const Vmax=5.0;         // x-axis: voltage [V]
+  const Imax=S.Isat||1;  // y-axis: current [μA] — use sat current or 1 if no effect
+
+  // ── Grid ──
+  ctx.strokeStyle='#0d1e30'; ctx.lineWidth=0.8;
+  for(let i=0;i<=5;i++){
+    const xg=gx+i*(gw/5);
+    ctx.beginPath(); ctx.moveTo(xg,gy); ctx.lineTo(xg,gy+gh); ctx.stroke();
+  }
+  for(let i=0;i<=4;i++){
+    const yg=gy+i*(gh/4);
+    ctx.beginPath(); ctx.moveTo(gx,yg); ctx.lineTo(gx+gw,yg); ctx.stroke();
+  }
+
+  // ── Axes ──
+  ctx.strokeStyle='#2a5080'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(gx,gy+gh); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(gx,gy+gh); ctx.lineTo(gx+gw,gy+gh); ctx.stroke();
+
+  // ── Axis labels ──
+  ctx.fillStyle='#5a8aaa'; ctx.font='8px Trebuchet MS'; ctx.textAlign='right';
+  for(let i=0;i<=4;i++){
+    const v=(Imax*(4-i)/4);
+    const yg=gy+i*(gh/4);
+    ctx.fillText(v.toFixed(v<1?2:1),gx-3,yg+3);
+  }
+  ctx.textAlign='center';
+  for(let i=0;i<=5;i++){
+    const v=(Vmax*i/5);
+    const xg=gx+i*(gw/5);
+    ctx.fillText(v.toFixed(1),xg,gy+gh+10);
+  }
+
+  ctx.fillStyle='#4a7090'; ctx.font='bold 8px Trebuchet MS';
+  ctx.textAlign='center';
+  ctx.fillText('Reverse Voltage V (V)',gx+gw/2,gy+gh+22);
+  ctx.save(); ctx.translate(10,gy+gh/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Current I (μA)',0,0); ctx.restore();
+
+  // ── I–V Curve ──
+  if(S.effect){
+    ctx.strokeStyle='#00ff88'; ctx.lineWidth=2;
+    ctx.shadowColor='#00ff88'; ctx.shadowBlur=6;
+    ctx.beginPath();
+    let first=true;
+    for(let i=0;i<=gw;i++){
+      const V=i/gw*Vmax;
+      let I;
+      if(V>=S.Vstop) I=0;
+      else I=S.Isat*(1-V/S.Vstop);
+      const px=gx+i;
+      const py=gy+gh-(I/Imax)*gh;
+      if(first){ctx.moveTo(px,py);first=false;}
+      else ctx.lineTo(px,py);
+    }
+    ctx.stroke(); ctx.shadowBlur=0;
+
+    // ── Operating point (current user setting) ──
+    const Vop=Math.min(S.voltage,Vmax);
+    const Iop=S.Icurr;
+    const opx=gx+(Vop/Vmax)*gw;
+    const opy=gy+gh-(Iop/Imax)*gh;
+
+    // Vertical dashed line to x-axis
+    ctx.strokeStyle='rgba(255,107,53,0.5)'; ctx.lineWidth=1; ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(opx,gy+gh); ctx.lineTo(opx,opy); ctx.stroke();
+    // Horizontal dashed line to y-axis
+    ctx.beginPath(); ctx.moveTo(gx,opy); ctx.lineTo(opx,opy); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Operating point dot
+    ctx.save();
+    ctx.fillStyle='#ff6b35'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.5;
+    ctx.shadowColor='#ff6b35'; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.arc(opx,opy,5,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+
+    // Stopping potential marker removed — students must measure it
+  } else {
+    // No effect → I = 0 line with message
+    ctx.strokeStyle='#ff3366'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(gx,gy+gh); ctx.lineTo(gx+gw,gy+gh); ctx.stroke();
+    ctx.fillStyle='#ff3366'; ctx.font='bold 9px Trebuchet MS'; ctx.textAlign='center';
+    ctx.fillText('No photoelectric effect (λ > λ₀)',gx+gw/2,gy+gh/2);
+  }
+
+  // ── Axis titles ──
+  ctx.fillStyle='#6a9ab0'; ctx.font='bold 8px Trebuchet MS'; ctx.textAlign='right';
+  ctx.fillText('I',gx-3,gy+5);
+}
+
+/* ================================================================
+   UPDATE HUD — instruments, chips, status bar
+   ================================================================ */
+function updateHUD(){
+  // Ammeter display — auto-scale μA / nA
+  const I=S.Icurr;
+  let aStr, aUnit;
+  if(I>=0.001){
+    aStr=I.toFixed(3); aUnit='μA';
+  } else {
+    aStr=(I*1000).toFixed(3); aUnit='nA';
+  }
+  document.getElementById('a-val').textContent=aStr;
+  document.getElementById('a-unt').textContent=aUnit;
+  document.getElementById('v-val').textContent=S.voltage.toFixed(2);
+
+  // Status bar
+  const sts=document.getElementById('sts');
+  if(!S.effect){
+    sts.className='stop';
+    sts.textContent='✗ No photoelectric effect — try a shorter wavelength.';
+  } else if(S.Icurr<0.0001){
+    sts.className='stop';
+    sts.textContent='● All electrons stopped — photocurrent = 0 μA.';
+  } else if(S.voltage>0){
+    sts.className='warn';
+    sts.textContent='⚡ Retarding field applied — photocurrent = '+I.toFixed(3)+' μA.';
+  } else {
+    sts.className='ok';
+    sts.textContent='⚡ Photoelectric effect active — photocurrent = '+I.toFixed(3)+' μA.';
+  }
+}
+
+/* ================================================================
+   SPAWN PARTICLES
+   ================================================================ */
+function spawnParticles(){
+  const W=pcC.width, H=pcC.height;
+  const cx=W*0.12+W*0.76*0.18;
+
+  // Photons — rate proportional to intensity
+  if(tick%Math.max(1,Math.round(60/Math.sqrt(S.intens/10)))<1&&Math.random()<0.7){
+    photons.push({t:0, spd:0.9+Math.random()*0.4, dy:(Math.random()-0.5)*1.8});
+  }
+
+  // Electrons: one emitted per photon that arrives — same rate as photon spawning
+  if(S.effect){
+    if(tick%Math.max(1,Math.round(60/Math.sqrt(S.intens/10)))<1 && Math.random()<0.7){
+      const keNorm=S.KEmax/(S.Ephoton-S.phi+0.01);
+      const vx0=1.6+keNorm*2.4;
+      electrons.push({
+        x:cx+12, y:H*0.5+(Math.random()-0.5)*H*0.35,
+        vx:vx0, vy:(Math.random()-0.5)*0.5,
+        alpha:0.9, alive:true
+      });
+    }
+  }
+  tick++;
+}
+
+/* ================================================================
+   MAIN ANIMATION LOOP
+   ================================================================ */
+function loop(){
+  spawnParticles();
+  drawPC();
+  requestAnimationFrame(loop);
+}
+
+/* ================================================================
+   SYNC SLIDERS ↔ TEXT INPUTS — bidirectional
+   ================================================================ */
+function syncWL(v){
+  v=Math.max(200,Math.min(700,+v));
+  S.lambda=v;
+  document.getElementById('wl-sl').value=v;
+  document.getElementById('wl-in').value=v;
+  // Update slider thumb colour to match wavelength
+  document.getElementById('wl-sl').style.setProperty('--thumb-col',wlColor(v));
+  update();
+}
+function syncIN(v){
+  v=Math.max(10,Math.min(1000,+v));
+  S.intens=v;
+  document.getElementById('in-sl').value=v;
+  document.getElementById('in-in').value=v;
+  update();
+}
+function syncVT(v){
+  v=Math.max(0,Math.min(5,+(+v).toFixed(2)));
+  S.voltage=v;
+  document.getElementById('vt-sl').value=v;
+  document.getElementById('vt-in').value=v.toFixed(2);
+  update();
+}
+
+document.getElementById('wl-sl').addEventListener('input',e=>syncWL(e.target.value));
+document.getElementById('in-sl').addEventListener('input',e=>syncIN(e.target.value));
+document.getElementById('vt-sl').addEventListener('input',e=>syncVT(e.target.value));
+document.getElementById('wl-in').addEventListener('change',e=>syncWL(e.target.value));
+document.getElementById('in-in').addEventListener('change',e=>syncIN(e.target.value));
+document.getElementById('vt-in').addEventListener('change',e=>syncVT(e.target.value));
+
+/* ================================================================
+   METAL SELECTOR
+   ================================================================ */
+function buildMetalList(){
+  const sel=document.getElementById('m-sel');
+  Object.keys(METALS).forEach(name=>{
+    const o=document.createElement('option');
+    o.value=name; o.textContent=name;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change',e=>{
+    S.metal=e.target.value;
+    // Clear answer feedback on metal change
+    document.getElementById('ans-res').style.display='none';
+    document.getElementById('ans-in').value='';
+    update();
+  });
+}
+
+/* ================================================================
+   CHECK ANSWER — 2 significant figures
+   ================================================================ */
+function checkAnswer(){
+  const ansEl=document.getElementById('ans-res');
+  const raw=parseFloat(document.getElementById('ans-in').value);
+  if(isNaN(raw)){
+    ansEl.className='wrg'; ansEl.style.display='block';
+    ansEl.textContent='✗ Please enter a number!'; return;
+  }
+  const actual=S.phi;
+  // Round both to 2 significant figures for comparison
+  const round2sf=n=>parseFloat(n.toPrecision(2));
+  if(round2sf(raw)===round2sf(actual)){
+    ansEl.className='cor'; ansEl.style.display='block';
+    ansEl.textContent='✓ Correct! φ = '+actual.toFixed(2)+' eV ('+S.metal+')';
+  } else {
+    ansEl.className='wrg'; ansEl.style.display='block';
+    ansEl.textContent='✗ Not quite — try again!';
+  }
+}
+// Allow Enter key to submit
+document.getElementById('ans-in').addEventListener('keydown',e=>{
+  if(e.key==='Enter') checkAnswer();
+});
+
+/* ================================================================
+   MASTER UPDATE — recalculates physics and redraws graph + HUD
+   ================================================================ */
+function update(){
+  calcPhysics();
+  updateHUD();
+  drawIV();
+  drawCircuit();
+}
+
+/* ================================================================
+   INITIALISE
+   ================================================================ */
+buildMetalList();
+window.addEventListener('resize',()=>{
+  resizeAll();
+  update();
+});
+
+// Delay initial resize until DOM has laid out
+setTimeout(()=>{
+  resizeAll();
+  update();
+  loop();
+},80);
+</script>
+</body>
+</html>
